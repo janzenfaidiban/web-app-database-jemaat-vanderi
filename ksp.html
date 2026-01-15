@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="id" x-data="{ 
+    sidebarOpen: true, 
+    currentPath: 'ksp.html' 
+}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data KSP - Admin Jemaat</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <style>
+        :root {
+            --primary-green: #198754;
+            --light-bg: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--light-bg);
+            overflow-x: hidden;
+        }
+
+        .shadow-md {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+        }
+
+        /* Sidebar Desktop */
+        .sidebar {
+            width: 260px;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            background: white;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar.closed {
+            left: -260px;
+        }
+
+        .nav-link {
+            color: #4b5563;
+            padding: 12px 20px;
+            margin: 4px 15px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: 0.2s;
+            text-decoration: none;
+        }
+
+        .nav-link:hover {
+            background: #f0fdf4;
+            color: var(--primary-green);
+        }
+
+        .nav-link.active {
+            background: var(--primary-green) !important;
+            color: white !important;
+        }
+
+        /* Main Content */
+        .main-wrapper {
+            margin-left: 260px;
+            transition: all 0.3s ease;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-wrapper.full {
+            margin-left: 0;
+        }
+
+        /* Table Custom */
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .thead-green {
+            background-color: #f0fdf4;
+            color: var(--primary-green);
+        }
+
+        /* Mobile Bottom Nav */
+        .mobile-bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: white;
+            border-top: 1px solid #dee2e6;
+            z-index: 1050;
+            padding: 10px 0;
+        }
+
+        @media (max-width: 992px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main-wrapper {
+                margin-left: 0 !important;
+                padding-bottom: 80px;
+            }
+
+            .mobile-bottom-nav {
+                display: flex;
+                justify-content: space-around;
+            }
+
+            .hide-mobile {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body x-data="{ 
+        modalMode: 'tambah', 
+        activeData: { id: '', nama: '', ketua: '', rayon: '', anggota: '' }, 
+        deleteTarget: '' 
+    }">
+
+    <aside class="sidebar shadow-md border-end" :class="sidebarOpen ? '' : 'closed'">
+        <div class="p-4 d-flex align-items-center">
+            <i class="bi bi-church-fill fs-3 text-success me-2"></i>
+            <span class="fw-bold fs-5 text-success">SI JEMAAT</span>
+        </div>
+        <hr class="mx-3 text-muted">
+        <nav>
+            <a href="dasbor.html" class="nav-link" :class="currentPath === 'dasbor.html' ? 'active' : ''">
+                <i class="bi bi-speedometer2"></i> Dasbor
+            </a>
+            <a href="rayon.html" class="nav-link" :class="currentPath === 'rayon.html' ? 'active' : ''">
+                <i class="bi bi-geo-alt"></i> Rayon
+            </a>
+            <a href="ksp.html" class="nav-link" :class="currentPath === 'ksp.html' ? 'active' : ''">
+                <i class="bi bi-people"></i> KSP
+            </a>
+            <a href="keluarga.html" class="nav-link" :class="currentPath === 'keluarga.html' ? 'active' : ''">
+                <i class="bi bi-house-door"></i> Keluarga
+            </a>
+            <a href="anggota.html" class="nav-link" :class="currentPath === 'anggota.html' ? 'active' : ''">
+                <i class="bi bi-person-badge"></i> Anggota Keluarga
+            </a>
+            <a href="rekap.html" class="nav-link" :class="currentPath === 'rekap.html' ? 'active' : ''">
+                <i class="bi bi-file-earmark-bar-graph"></i> Rekap/Laporan
+            </a>
+            <hr class="mx-3 text-muted">
+            <a href="index.html" class="nav-link text-danger">
+                <i class="bi bi-box-arrow-right"></i> Keluar
+            </a>
+        </nav>
+    </aside>
+
+    <div class="main-wrapper" :class="sidebarOpen ? '' : 'full'">
+        <header class="navbar navbar-expand bg-white shadow-sm sticky-top px-3 py-2">
+            <div class="container-fluid">
+                <button class="btn btn-light hide-mobile" @click="sidebarOpen = !sidebarOpen">
+                    <i class="bi bi-list fs-4"></i>
+                </button>
+
+                <div class="d-lg-none mx-auto d-flex align-items-center">
+                    <i class="bi bi-church-fill text-success fs-4 me-2"></i>
+                    <span class="fw-bold text-success">SI JEMAAT</span>
+                </div>
+
+                <div class="ms-auto">
+                    <div class="dropdown">
+                        <button class="btn btn-white border-0 d-flex align-items-center p-0 gap-2" type="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="me-1 hide-mobile fw-medium">Vanderi Yarangga</span>
+                            <div class="bg-success rounded-circle d-flex align-items-center justify-content-center text-white shadow-sm"
+                                style="width: 35px; height:35px;">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                        </button>
+
+                        <ul class="dropdown-menu dropdown-menu-end shadow-md border-0 mt-3 p-2"
+                            style="min-width: 200px;">
+                            <li>
+                                <div class="px-3 py-2 d-lg-none border-bottom mb-2">
+                                    <small class="text-muted d-block">Nama Lengkap</small>
+                                    <span class="fw-bold text-success">Vanderi Yarangga</span>
+                                </div>
+                            </li>
+                            <li>
+                                <a class="dropdown-item py-2 rounded-2 d-flex align-items-center gap-2" href="#">
+                                    <i class="bi bi-person-circle text-muted"></i> Profil Saya
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item py-2 rounded-2 d-flex align-items-center gap-2" href="#">
+                                    <i class="bi bi-shield-lock text-muted"></i> Ganti Password
+                                </a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <a class="dropdown-item py-2 rounded-2 d-flex align-items-center gap-2 text-danger"
+                                    href="index.html">
+                                    <i class="bi bi-box-arrow-right"></i> Keluar
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="container-fluid p-4">
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="dasbor.html" class="text-success text-decoration-none">Dasbor</a></li>
+                    <li class="breadcrumb-item active">Kelompok Sel (KSP)</li>
+                </ol>
+            </nav>
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="fw-bold mb-1">Daftar KSP</h4>
+                    <p class="text-muted small mb-0">Manajemen data Kelompok Sel Pemuridan</p>
+                </div>
+                <button class="btn btn-success px-3 shadow-sm d-flex align-items-center gap-2" data-bs-toggle="modal"
+                    data-bs-target="#modalKSP"
+                    @click="modalMode = 'tambah'; activeData = {id:'', nama:'', ketua:'', rayon:'', anggota:''}">
+                    <i class="bi bi-plus-circle"></i> <span>Tambah KSP</span>
+                </button>
+            </div>
+
+            <div class="table-container shadow-md border-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="thead-green">
+                            <tr>
+                                <th class="py-3 px-3">ID KSP</th>
+                                <th class="py-3">Nama KSP</th>
+                                <th class="py-3">Rayon</th>
+                                <th class="py-3">Ketua KSP</th>
+                                <th class="py-3">Keluarga</th>
+                                <th class="py-3 text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="px-3 fw-bold">KSP-01</td>
+                                <td>Efata</td>
+                                <td><span class="badge bg-light text-success border border-success">Rayon Yerusalem</span></td>
+                                <td>Bpk. Yohanes M.</td>
+                                <td>12 KK</td>
+                                <td class="text-center">
+                                    <div class="btn-group shadow-sm">
+                                        <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalKSP"
+                                            @click="modalMode = 'detail'; activeData = {id:'KSP-01', nama:'Efata', ketua:'Bpk. Yohanes M.', rayon:'Rayon Yerusalem', anggota:'12'}">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                        <button class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalKSP"
+                                            @click="modalMode = 'ubah'; activeData = {id:'KSP-01', nama:'Efata', ketua:'Bpk. Yohanes M.', rayon:'Rayon Yerusalem', anggota:'12'}">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </button>
+                                        <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#modalHapus" @click="deleteTarget = 'KSP Efata'">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 fw-bold">KSP-02</td>
+                                <td>Maranatha</td>
+                                <td><span class="badge bg-light text-success border border-success">Rayon Galilea</span></td>
+                                <td>Ibu Martha S.</td>
+                                <td>8 KK</td>
+                                <td class="text-center">
+                                    <div class="btn-group shadow-sm">
+                                        <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalKSP"
+                                            @click="modalMode = 'detail'; activeData = {id:'KSP-02', nama:'Maranatha', ketua:'Ibu Martha S.', rayon:'Rayon Galilea', anggota:'8'}">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                        <button class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalKSP"
+                                            @click="modalMode = 'ubah'; activeData = {id:'KSP-02', nama:'Maranatha', ketua:'Ibu Martha S.', rayon:'Rayon Galilea', anggota:'8'}">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </button>
+                                        <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#modalHapus" @click="deleteTarget = 'KSP Maranatha'">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+
+        <footer class="mt-auto p-4 bg-white border-top text-center text-md-start">
+            <div class="container-fluid">
+                <div class="row align-items-center">
+                    <div class="col-md-6 text-muted small">&copy; 2026 <strong>Database Jemaat</strong>.</div>
+                    <div class="col-md-6 text-md-end small">Designed by <a href="#" class="text-success fw-bold text-decoration-none">Vanderi</a></div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <nav class="mobile-bottom-nav shadow-lg">
+        <a href="dasbor.html" class="text-center text-decoration-none text-muted">
+            <i class="bi bi-grid-1x2-fill fs-5"></i>
+            <div style="font-size: 11px;">Dasbor</div>
+        </a>
+        <a href="ksp.html" class="text-center text-decoration-none text-success">
+            <i class="bi bi-people-fill fs-5"></i>
+            <div style="font-size: 11px;">KSP</div>
+        </a>
+        <a href="keluarga.html" class="text-center text-decoration-none text-muted">
+            <i class="bi bi-house-door-fill fs-5"></i>
+            <div style="font-size: 11px;">Keluarga</div>
+        </a>
+        <a href="rekap.html" class="text-center text-decoration-none text-muted">
+            <i class="bi bi-file-earmark-bar-graph-fill fs-5"></i>
+            <div style="font-size: 11px;">Laporan</div>
+        </a>
+    </nav>
+
+    <div class="modal fade" id="modalKSP" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold text-success">
+                        <i :class="modalMode === 'tambah' ? 'bi-plus-circle' : (modalMode === 'ubah' ? 'bi-pencil-square' : 'bi-eye')"></i>
+                        <span x-text="modalMode === 'tambah' ? 'Tambah KSP' : (modalMode === 'ubah' ? 'Ubah KSP' : 'Detail KSP')"></span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Nama KSP</label>
+                        <input type="text" class="form-control" x-model="activeData.nama" :readonly="modalMode === 'detail'" placeholder="Contoh: Efata">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Pilih Rayon</label>
+                        <select class="form-select" x-model="activeData.rayon" :disabled="modalMode === 'detail'">
+                            <option value="">-- Pilih Rayon --</option>
+                            <option>Rayon Yerusalem</option>
+                            <option>Rayon Galilea</option>
+                            <option>Rayon Betlehem</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Ketua KSP</label>
+                        <input type="text" class="form-control" x-model="activeData.ketua" :readonly="modalMode === 'detail'">
+                    </div>
+                    <div class="mb-3" x-show="modalMode === 'detail'">
+                        <label class="form-label small fw-bold">Total Keluarga Terdaftar</label>
+                        <input type="text" class="form-control bg-light" x-model="activeData.anggota" readonly>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Tutup</button>
+                    <button type="button" class="btn btn-success" x-show="modalMode !== 'detail'">
+                        <i class="bi bi-save me-1"></i> Simpan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalHapus" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-body text-center p-4">
+                    <div class="text-danger mb-3">
+                        <i class="bi bi-exclamation-triangle-fill" style="font-size: 3rem;"></i>
+                    </div>
+                    <h5 class="fw-bold">Konfirmasi Hapus</h5>
+                    <p class="text-muted small">Hapus data <strong x-text="deleteTarget"></strong>? Seluruh data keluarga di dalamnya akan kehilangan relasi KSP.</p>
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="button" class="btn btn-danger shadow-sm">Ya, Hapus Data</button>
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+</body>
+</html>
